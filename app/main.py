@@ -65,8 +65,8 @@ class App(ctk.CTk):
         ctk.set_default_color_theme("dark-blue")
 
         self.title("WATCHDOG CONSOLE // JumpServer")
-        self.geometry("1040x780")
-        self.minsize(900, 680)
+        self.geometry("1080x860")
+        self.minsize(960, 720)
         self.configure(fg_color=BG)
 
         self.client = WatchdogClient()
@@ -237,16 +237,29 @@ class App(ctk.CTk):
             border_color=LINE,
         ).pack(anchor="w", pady=(10, 0))
 
-        # Simulate
+        # Simulate + output (scrollable column so buttons never crush)
         mid_wrap = ctk.CTkFrame(self, fg_color="transparent")
         mid_wrap.pack(fill="both", expand=True, padx=18, pady=8)
-        sim = self._card(mid_wrap, "03  //  SIMULATE Q&A")
-        sim.master.pack(fill="both", expand=True)
+        mid_wrap.grid_columnconfigure(0, weight=1)
+        mid_wrap.grid_rowconfigure(1, weight=1)
 
-        ctk.CTkLabel(sim, text="样例问题", text_color=MUTED, anchor="w").pack(fill="x")
+        sim = self._card(mid_wrap, "03  //  SIMULATE Q&A")
+        sim.master.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+
+        form = ctk.CTkFrame(sim, fg_color="transparent")
+        form.pack(fill="x")
+        form.grid_columnconfigure(0, weight=1)
+        form.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(form, text="样例问题", text_color=MUTED, anchor="w").grid(
+            row=0, column=0, sticky="ew", padx=(0, 8)
+        )
+        ctk.CTkLabel(form, text="模拟群名", text_color=MUTED, anchor="w").grid(
+            row=0, column=1, sticky="ew", padx=(8, 0)
+        )
         self.q_var = tk.StringVar(value=SAMPLES[0])
         ctk.CTkOptionMenu(
-            sim,
+            form,
             variable=self.q_var,
             values=SAMPLES,
             command=self._on_sample,
@@ -256,34 +269,37 @@ class App(ctk.CTk):
             dropdown_fg_color=PANEL,
             text_color=TEXT,
             height=36,
-        ).pack(fill="x", pady=(4, 8))
-
-        ctk.CTkLabel(sim, text="模拟群名", text_color=MUTED, anchor="w").pack(fill="x")
+        ).grid(row=1, column=0, sticky="ew", padx=(0, 8), pady=(4, 8))
         self.group_var = tk.StringVar(value="【JS】GUI模拟群")
         ctk.CTkEntry(
-            sim,
+            form,
             textvariable=self.group_var,
             fg_color=PANEL2,
             border_color=LINE,
             text_color=TEXT,
             height=36,
-        ).pack(fill="x", pady=(4, 8))
+        ).grid(row=1, column=1, sticky="ew", padx=(8, 0), pady=(4, 8))
 
         ctk.CTkLabel(sim, text="自定义问题", text_color=MUTED, anchor="w").pack(fill="x")
         self.q_text = ctk.CTkTextbox(
             sim,
-            height=90,
+            height=72,
             fg_color=PANEL2,
             border_color=LINE,
             border_width=1,
             text_color=TEXT,
             font=ctk.CTkFont(family="Consolas", size=13),
         )
-        self.q_text.pack(fill="x", pady=(4, 8))
+        self.q_text.pack(fill="x", pady=(4, 10))
         self.q_text.insert("1.0", SAMPLES[0])
 
+        # 2×2 grid — avoids 4-button side-by-side overlap on Windows CTk
         act = ctk.CTkFrame(sim, fg_color="transparent")
-        act.pack(fill="x", pady=(0, 8))
+        act.pack(fill="x", pady=(0, 4))
+        act.grid_columnconfigure(0, weight=1, uniform="act")
+        act.grid_columnconfigure(1, weight=1, uniform="act")
+
+        btn_kw = dict(height=40, corner_radius=10)
         ctk.CTkButton(
             act,
             text="仅生成建议",
@@ -293,8 +309,8 @@ class App(ctk.CTk):
             border_width=1,
             border_color=CYAN,
             text_color=CYAN,
-            height=40,
-        ).pack(side="left", expand=True, fill="x", padx=(0, 6))
+            **btn_kw,
+        ).grid(row=0, column=0, sticky="ew", padx=(0, 6), pady=(0, 8))
         ctk.CTkButton(
             act,
             text="生成并推飞书",
@@ -302,9 +318,9 @@ class App(ctk.CTk):
             fg_color=CYAN,
             hover_color="#67e8f9",
             text_color="#041018",
-            height=40,
-            font=ctk.CTkFont(size=14, weight="bold"),
-        ).pack(side="left", expand=True, fill="x", padx=(6, 6))
+            font=ctk.CTkFont(size=13, weight="bold"),
+            **btn_kw,
+        ).grid(row=0, column=1, sticky="ew", padx=(6, 0), pady=(0, 8))
         ctk.CTkButton(
             act,
             text="推送上次到飞书",
@@ -314,32 +330,32 @@ class App(ctk.CTk):
             border_width=1,
             border_color=MINT,
             text_color=MINT,
-            height=40,
-        ).pack(side="left", expand=True, fill="x", padx=(0, 6))
+            **btn_kw,
+        ).grid(row=1, column=0, sticky="ew", padx=(0, 6))
         ctk.CTkButton(
             act,
-            text="清空",
+            text="清空输出",
             command=self.clear_out,
             fg_color=PANEL2,
             hover_color="#16324a",
             border_width=1,
             border_color=LINE,
             text_color=MUTED,
-            height=40,
-            width=80,
-        ).pack(side="left", fill="x")
+            **btn_kw,
+        ).grid(row=1, column=1, sticky="ew", padx=(6, 0))
+
         ctk.CTkLabel(
             sim,
-            text="「生成并推飞书」会走 FEISHU_NOTIFY_WEBHOOK；消息带【GUI 模拟推送】前缀",
+            text="「生成并推飞书」走 FEISHU_NOTIFY_WEBHOOK；消息带【GUI 模拟推送】前缀",
             text_color="#5b6b7c",
             font=ctk.CTkFont(size=11),
             anchor="w",
-        ).pack(fill="x", pady=(0, 4))
+        ).pack(fill="x", pady=(8, 0))
 
-        ctk.CTkLabel(sim, text="04  //  OUTPUT", text_color=CYAN, anchor="w").pack(fill="x", pady=(4, 4))
+        out_body = self._card(mid_wrap, "04  //  OUTPUT")
+        out_body.master.grid(row=1, column=0, sticky="nsew")
         self.out = ctk.CTkTextbox(
-            sim,
-            height=220,
+            out_body,
             fg_color="#06141e",
             border_color="#1a4a3a",
             border_width=1,
