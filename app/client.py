@@ -44,6 +44,8 @@ class WatchdogClient:
         group_name: str = "【JS】GUI模拟群",
         waiting_minutes: float = 6.0,
         product: str = "js",
+        notify_feishu: bool = False,
+        force_real: bool = True,
     ) -> Dict[str, Any]:
         with httpx.Client(timeout=self.timeout) as c:
             r = c.post(
@@ -53,6 +55,30 @@ class WatchdogClient:
                     "group_name": group_name,
                     "waiting_minutes": waiting_minutes,
                     "product": product,
+                    "notify_feishu": notify_feishu,
+                    "force_real": force_real,
+                },
+            )
+            r.raise_for_status()
+            return r.json()
+
+    def feishu_push(
+        self,
+        suggestion: str,
+        question: str = "",
+        group_name: str = "【JS】GUI模拟群",
+        source: str = "gui",
+        force_real: bool = True,
+    ) -> Dict[str, Any]:
+        with httpx.Client(timeout=30.0) as c:
+            r = c.post(
+                f"{self.base_url}/admin/feishu-push",
+                json={
+                    "suggestion": suggestion,
+                    "question": question,
+                    "group_name": group_name,
+                    "source": source,
+                    "force_real": force_real,
                 },
             )
             r.raise_for_status()
