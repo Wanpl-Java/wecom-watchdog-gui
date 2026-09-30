@@ -22,17 +22,19 @@ python -m venv .venv
 run.bat
 ```
 
-`run.bat` 会自动设置 `TCL_LIBRARY` / `TK_LIBRARY`（修复部分 Python 3.13 找不到 `init.tcl` 的问题）。  
-若桌面 Tk 仍不可用，会自动启动浏览器版：http://127.0.0.1:8765
-
-也可手动：
+`run.bat` 默认打开 **科技感浏览器 HUD**（http://127.0.0.1:8765）：深空背景、网格漂移、玻璃拟态卡片、青霓虹描边（参考开源 cyber dashboard / glassmorphism 风格）。
 
 ```bash
-# 桌面版
-.venv\Scripts\python app\main.py
-
-# 浏览器版（无需 Tcl/Tk）
+run.bat
+# 或
 .venv\Scripts\python app\web_ui.py
+```
+
+若仍要桌面 Tk 窗口：
+
+```bash
+set USE_DESKTOP=1
+run.bat
 ```
 
 ## 仓库
