@@ -1,32 +1,7 @@
-# WeCom Watchdog Console
+# wecom-watchdog-gui（已合并）
 
-原生 **桌面 GUI 窗口**（CustomTkinter 深色科技风），对接本地 `wecom-group-watchdog`（默认 http://127.0.0.1:8092）。
+本仓库代码已合并到：
 
-## 功能
+**https://github.com/Wanpl-Java/wecom-group-watchdog** → 目录 [`gui/`](https://github.com/Wanpl-Java/wecom-group-watchdog/tree/main/gui)
 
-1. **定时校验间隔**：5 / 10 / 15 / 30 分钟或自定义  
-2. **立即扫描**  
-3. **模拟话术问答**  
-
-## 启动（桌面窗口）
-
-```bash
-python -m venv .venv
-.venv\Scripts\pip install -r requirements.txt
-run.bat
-```
-
-`run.bat` **默认打开桌面 GUI**。会自动设置 `TCL_LIBRARY` / `TK_LIBRARY`（修复 Python 3.13 找不到 Tcl 的问题）。  
-仅当桌面启动失败时，才回退浏览器版。
-
-```bash
-# 仅桌面
-.venv\Scripts\python app\main.py
-
-# 仅浏览器（可选）
-.venv\Scripts\python app\web_ui.py
-```
-
-## 仓库
-
-https://github.com/Wanpl-Java/wecom-watchdog-gui
+请到主仓库使用桌面控制台与 Watchdog 服务，本仓库仅保留跳转说明，不再更新功能。
