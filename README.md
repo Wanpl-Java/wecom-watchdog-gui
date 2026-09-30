@@ -22,8 +22,21 @@ WeCom Watchdog Console
 ```bash
 python -m venv .venv
 # Windows
-.venv\\Scripts\\pip install -r requirements.txt
-.venv\\Scripts\\python app\\main.py
+.venv\Scripts\pip install -r requirements.txt
+run.bat
+```
+
+`run.bat` 会自动设置 `TCL_LIBRARY` / `TK_LIBRARY`（修复部分 Python 3.13 找不到 `init.tcl` 的问题）。  
+若桌面 Tk 仍不可用，会自动启动浏览器版：http://127.0.0.1:8765
+
+也可手动：
+
+```bash
+# 桌面版
+.venv\Scripts\python app\main.py
+
+# 浏览器版（无需 Tcl/Tk）
+.venv\Scripts\python app\web_ui.py
 ```
 
 作者 / 仓库

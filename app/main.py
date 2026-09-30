@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import threading
 import tkinter as tk
@@ -9,6 +10,26 @@ from datetime import datetime
 from pathlib import Path
 from tkinter import messagebox, ttk
 from typing import Optional
+
+# Fix common Windows Python embed where Tcl path resolves to .../lib/tcl8.6
+def _fix_tcl_env() -> None:
+    candidates = [
+        Path(r"D:\Python313"),
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Python" / "Python313",
+        Path(sys.base_prefix),
+        Path(sys.prefix),
+    ]
+    for root in candidates:
+        tcl = root / "tcl" / "tcl8.6"
+        tk_ = root / "tcl" / "tk8.6"
+        if (tcl / "init.tcl").is_file():
+            os.environ.setdefault("TCL_LIBRARY", str(tcl))
+            if (tk_ / "tk.tcl").is_file():
+                os.environ.setdefault("TK_LIBRARY", str(tk_))
+            break
+
+
+_fix_tcl_env()
 
 _APP_DIR = Path(__file__).resolve().parent
 if str(_APP_DIR) not in sys.path:
