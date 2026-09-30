@@ -152,12 +152,19 @@ class App(ctk.CTk):
         ctk.CTkButton(
             link_body,
             text="检测连接  PING",
-            command=self.refresh_status,
+            command=self.ping,
             fg_color="#0e7490",
             hover_color="#0891b2",
             text_color=TEXT,
             height=36,
         ).pack(fill="x")
+        ctk.CTkLabel(
+            link_body,
+            text="作用：请求 /healthz，确认本机 Watchdog 是否可访问",
+            text_color="#5b6b7c",
+            font=ctk.CTkFont(size=11),
+            anchor="w",
+        ).pack(fill="x", pady=(6, 0))
         self.status_var = tk.StringVar(value="状态：未检测")
         ctk.CTkLabel(
             link_body,
@@ -347,7 +354,7 @@ class App(ctk.CTk):
     def _set_live(self, online: bool, text: str) -> None:
         self.live_lbl.configure(text=f"● {text}", text_color=MINT if online else "#fb7185")
 
-    def refresh_status(self) -> None:
+    def refresh_status(self, *, notify: bool = False) -> None:
         self._sync_client()
 
         def work() -> None:
@@ -358,15 +365,41 @@ class App(ctk.CTk):
                     f"scan={data.get('scan_interval_minutes')}min · "
                     f"source={data.get('message_source')}"
                 )
+                detail = (
+                    "连接成功！\n\n"
+                    f"地址：{self.base_var.get().strip()}\n"
+                    f"模式：{data.get('workbuddy_mode')}\n"
+                    f"扫描间隔：{data.get('scan_interval_minutes')} 分钟\n"
+                    f"消息源：{data.get('message_source')}\n"
+                    f"safe_mode：{data.get('safe_mode')}"
+                )
                 self.after(0, lambda: self.status_var.set(msg))
                 self.after(0, lambda: self._set_live(True, "ONLINE"))
                 self.after(0, lambda: self._set_log("healthz ok"))
+                if notify:
+                    self.after(0, lambda: messagebox.showinfo("检测连接", detail))
             except Exception as e:  # noqa: BLE001
-                self.after(0, lambda: self.status_var.set(f"OFFLINE — {e}"))
+                err = str(e)
+                self.after(0, lambda: self.status_var.set(f"OFFLINE — {err}"))
                 self.after(0, lambda: self._set_live(False, "OFFLINE"))
-                self.after(0, lambda: self._set_log(f"healthz failed: {e}"))
+                self.after(0, lambda: self._set_log(f"healthz failed: {err}"))
+                if notify:
+                    self.after(
+                        0,
+                        lambda: messagebox.showerror(
+                            "检测连接失败",
+                            "无法连通 Watchdog 服务。\n\n"
+                            f"地址：{self.base_var.get().strip()}\n"
+                            f"错误：{err}\n\n"
+                            "请确认已启动 wecom-group-watchdog（默认 8092）。",
+                        ),
+                    )
 
         threading.Thread(target=work, daemon=True).start()
+
+    def ping(self) -> None:
+        """手动点击「检测连接」时弹窗提示结果。"""
+        self.refresh_status(notify=True)
 
     def apply_interval(self) -> None:
         minutes = self._minutes()
